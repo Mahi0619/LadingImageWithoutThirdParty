@@ -18,6 +18,7 @@ Android Studio Electric Eel | 2022.1.1 Patch 2
 - Observe the API state using a coroutine. The `repeatOnLifecycle` function is used to automatically start and stop collecting the flow based on the fragment's lifecycle.
 - Define functions to handle different API states: loading, success, failure, and empty.
 - Define an `onItemClick` callback to handle item click events.
+- Added Image preview functionality to view the selected images.
 
 ## RecyclerView Adapter Class:
 - Define a RecyclerView Adapter class extending `RecyclerView.Adapter`.
