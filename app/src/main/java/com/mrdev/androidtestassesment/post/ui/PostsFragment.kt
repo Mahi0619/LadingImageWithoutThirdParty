@@ -95,10 +95,17 @@ class PostsFragment : Fragment() {
 
 package com.mrdev.androidtestassesment.post.ui
 
+import android.app.Dialog
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -108,6 +115,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mrdev.androidtestassesment.MainActivity
+import com.mrdev.androidtestassesment.R
+import com.mrdev.androidtestassesment.base.Loader
 import com.mrdev.androidtestassesment.data.util.ApiState
 import com.mrdev.androidtestassesment.databinding.FragmentPostBinding
 import com.mrdev.androidtestassesment.other.CallBack
@@ -116,6 +125,8 @@ import com.mrdev.androidtestassesment.post.adapter.PostAdapter
 import com.mrdev.androidtestassesment.post.postModel.PostBean
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.net.HttpURLConnection
+import java.net.URL
 
 @AndroidEntryPoint
 class PostsFragment : Fragment() {
@@ -129,19 +140,22 @@ class PostsFragment : Fragment() {
     private lateinit var postAdapter: PostAdapter
     private val originalData: ArrayList<PostBean> = ArrayList()
 
+    lateinit var dLoader: Loader
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentPostBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
+        dLoader = Loader(requireContext())
         setupRecyclerView()
         observeApiState()
         return binding.root
     }
 
     private fun setupRecyclerView() {
-        postAdapter = PostAdapter(requireContext(), onItemClick,originalData)
+        postAdapter = PostAdapter(requireContext(), onItemClick, originalData)
         binding.rcvPost.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rcvPost.adapter = postAdapter
 
@@ -187,9 +201,11 @@ class PostsFragment : Fragment() {
     }
 
     private fun showSuccessState(data: List<PostBean>) {
-        binding.progressbar.visibility = View.GONE
+
+        dLoader.dismiss()
+
         binding.rcvPost.visibility = View.VISIBLE
-       // postAdapter.updateData(data)
+        // postAdapter.updateData(data)
         originalData.addAll(data)
         postAdapter.notifyDataSetChanged()
         isLoading = false
@@ -197,21 +213,21 @@ class PostsFragment : Fragment() {
     }
 
     private fun showLoadingState() {
-        binding.progressbar.visibility = View.VISIBLE
+        dLoader.show()
         binding.rcvPost.visibility = View.GONE
         isLoading = true
     }
 
     private fun showErrorState(error: Throwable) {
         isLoading = false
-        binding.progressbar.visibility = View.GONE
+        dLoader.dismiss()
         binding.rcvPost.visibility = View.VISIBLE
         // Handle error display
     }
 
     private fun hideLoadingState() {
         isLoading = false
-        binding.progressbar.visibility = View.GONE
+        dLoader.dismiss()
         binding.rcvPost.visibility = View.VISIBLE
     }
 
@@ -220,10 +236,10 @@ class PostsFragment : Fragment() {
         viewModel.getPosts(currentPage)
     }
 
-   /* private fun loadMoreItems() {
-        isLoading = true
-        viewModel.getPosts(currentPage)
-    }*/
+    /* private fun loadMoreItems() {
+         isLoading = true
+         viewModel.getPosts(currentPage)
+     }*/
 
 
     private fun loadMoreItems() {
@@ -240,14 +256,61 @@ class PostsFragment : Fragment() {
 
     private val onItemClick = object : CallBack<PostBean>() {
         override fun onSuccess(t: PostBean) {
-            val frg = (requireActivity() as MainActivity)
-            frg.navigateToFragment(PostDetailFragment.newInstance(t))
+
+            val imageUrl = "${t.thumbnail.domain}/${t.thumbnail.basePath}/0/${t.thumbnail.key}"
+            // Toast.makeText(requireContext(),"${t.title}",Toast.LENGTH_SHORT).show()
+
+            imagePreview(imageUrl)
         }
 
         override fun onError(error: String?) {
             Toast.makeText(requireContext(), error ?: "Unknown error", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun imagePreview(imageUrl: String) {
+
+        val dialog = Dialog(requireActivity())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.image_preview)
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val img = dialog.findViewById<ImageView>(R.id.ivImages)
+        val close = dialog.findViewById<ImageView>(R.id.ivClose)
+
+        loadImageFromNetwork(imageUrl, img)
+        close.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+
+
+    }
+
+    private fun loadImageFromNetwork(imageUrl: String, imageView: ImageView) {
+        // Set placeholder image or loader while image is loading
+        imageView.setImageResource(R.drawable.placeholder_loader)
+
+        val thread = Thread {
+            try {
+                val url = URL(imageUrl)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.doInput = true
+                connection.connect()
+                val inputStream = connection.inputStream
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                // Set the bitmap to the ImageView on the main UI thread
+                imageView.post {
+                    imageView.setImageBitmap(bitmap)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Handle the case when the image fails to load
+            }
+        }
+        thread.start()
+    }
+
+
 }
 
 

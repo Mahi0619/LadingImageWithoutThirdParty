@@ -43,14 +43,23 @@ class PostAdapter(
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title: ImageView = itemView.findViewById(R.id.ivImages)
+        private val cvMain: CardView = itemView.findViewById(R.id.card_view)
 
         fun bind(post: PostBean) {
             // Load image asynchronously in the background
             loadImageFromNetwork(post.thumbnail, title)
+            cvMain.setOnClickListener {
+                onItemClick.onSuccess(post)
+            }
         }
 
+
         private fun loadImageFromNetwork(thumbnail: PostBean.Thumbnail, imageView: ImageView) {
+
             val imageUrl = "${thumbnail.domain}/${thumbnail.basePath}/0/${thumbnail.key}"
+            imageView.setImageResource(R.drawable.placeholder_loader)
+
+
             // Check if the bitmap exists in the local cache
             val cachedBitmap = localCache[imageUrl]
             if (cachedBitmap != null) {
