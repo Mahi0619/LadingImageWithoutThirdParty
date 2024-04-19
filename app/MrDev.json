@@ -1,0 +1,29 @@
+[
+    {
+    "id": "coverage-416f6c",
+    "title": "Beating the clock starts with you",
+    "language": "english",
+    "thumbnail": {
+      "id": "img-98ea7bac-444d-460e-b583-3c0f89a8863e",
+      "version": 1,
+      "domain": "https://cimg.acharyaprashant.org",
+      "basePath": "https://cimg.acharyaprashant.org/images/img-98ea7bac-444d-460e-b583-3c0f89a8863e/0/image.jpg",
+      "key": "image.jpg",
+      "qualities": [
+        10,
+        20,
+        30,
+        40
+      ],
+      "aspectRatio": 1
+    },
+    "mediaType": 0,
+    "coverageURL": "https://www.newindianexpress.com/lifestyle/spirituality/2024/Apr/13/beating-the-clock-starts-with-you",
+    "publishedAt": "2024-04-14",
+    "publishedBy": "The Indian Express",
+    "backupDetails": {
+      "pdfLink": "https://www.newindianexpress.com/lifestyle/spirituality/2024/Apr/13/beating-the-clock-starts-with-you",
+      "screenshotURL": "https://www.newindianexpress.com/lifestyle/spirituality/2024/Apr/13/beating-the-clock-starts-with-you"
+    }
+  }
+]
