@@ -1,4 +1,12 @@
 
+
+Android Studio Electric Eel | 2022.1.1 Patch 2
+
+
+## AGP version: 7.4.2
+## Gradle version: 7.5
+
+
 ## To clone repository use url: git clone https://github.com/Mahi0619/LadingImageWithoutThirdParty.git
 
 
